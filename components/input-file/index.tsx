@@ -1,10 +1,36 @@
-export default function InputFile() {
-  function showFileName(e: React.ChangeEvent<HTMLInputElement>) {
-    const input = e.target;
+import { useEffect } from "react";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import RestorePageIcon from "@mui/icons-material/RestorePage";
+
+interface InputFileProps {
+  files: File[];
+  handleFilesChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export default function InputFile({
+  handleFilesChange,
+  files,
+}: InputFileProps) {
+  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    handleFilesChange(e);
+  }
+
+  useEffect(() => {
+    const output = document.getElementById("file-name");
+    if (output !== null) {
+      if (files.length > 0) {
+        showFileName();
+      } else {
+        output.innerHTML = ""; // Clear the content if no files are present
+      }
+    }
+  }, [files]);
+
+  function showFileName() {
     const output =
-      document.getElementById("file-name") ?? document.createElement("div");
-    const children = Array.from(input?.files ?? []).map((file) => {
-      return `<div>${file?.name}</div>`;
+      document.getElementById("file-name") ?? document.createElement("ul");
+    const children = Array.from(files ?? []).map((file) => {
+      return `<li class="text-indigo-800">${file?.name}</li>`;
     });
     output.innerHTML = children.join("");
   }
@@ -12,20 +38,31 @@ export default function InputFile() {
     <>
       <label
         htmlFor="file-upload"
-        className="cursor-pointer inline-block bg-blue-500 text-white rounded-md px-4 py-2"
+        className="size-28 border-dotted m-auto text-center cursor-pointer flex flex-col justify-center content-center items-center text-indigo-500 px-4 py-2"
       >
-        Upload files
+        {files.length > 0 ? (
+          <RestorePageIcon fontSize="large" />
+        ) : (
+          <AttachFileIcon fontSize="large" />
+        )}
+
+        <span className="m-auto text-center ml-2">
+          {files.length > 0 ? "Restore Files" : "Attach Files"}
+        </span>
       </label>
       <input
         id="file-upload"
         className="hidden"
         type="file"
         name="document"
-        onChange={showFileName}
+        onChange={onChange}
         required
         multiple
       />
-      <div id="file-name" className="mt-2 text-gray-700"></div>
+      <div
+        id="file-name"
+        className="overflow-auto m-auto w-5/6 h-24 max-[500px]:bg-red-400 md:h-52 mt-2 text-gray-700"
+      ></div>
     </>
   );
 }
