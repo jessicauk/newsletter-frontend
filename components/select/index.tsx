@@ -1,5 +1,4 @@
-import React from "react";
-
+import React, { useEffect } from "react";
 import { Theme, useTheme } from "@mui/material/styles";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import MenuItem from "@mui/material/MenuItem";
@@ -15,19 +14,6 @@ const MenuProps = {
     },
   },
 };
-
-const names = [
-  "Oliver Hansen",
-  "Van Henry",
-  "April Tucker",
-  "Ralph Hubbard",
-  "Omar Alexander",
-  "Carlos Abbott",
-  "Miriam Wagner",
-  "Bradley Wilkerson",
-  "Virginia Andrews",
-  "Kelly Snyder",
-];
 
 function getStyles(name: string, personName: readonly string[], theme: Theme) {
   return {
@@ -46,25 +32,36 @@ interface SelectProps<T> {
   name: string;
   required?: boolean;
   data: T extends Data ? T[] : never;
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
+  selected: string[];
 }
 
 export default function MultipleSelectPlaceholder<T>({
   name,
   required,
   data,
+  setSelected,
+  selected,
 }: SelectProps<T>) {
   const theme = useTheme();
-  const [personName, setPersonName] = React.useState<string[]>([]);
+  const [personName, setPersonName] = React.useState<string[]>(selected);
 
   const handleChange = (event: SelectChangeEvent<typeof personName>) => {
     const {
       target: { value },
     } = event;
+    setSelected(value as string[]);
     setPersonName(
       // On autofill we get a stringified value.
       typeof value === "string" ? value.split(",") : value
     );
   };
+
+  useEffect(() => {
+    if (selected.length === 0) {
+      setPersonName([]);
+    }
+  }, [selected]);
 
   return (
     <>
@@ -84,23 +81,26 @@ export default function MultipleSelectPlaceholder<T>({
           return selected.join(", ");
         }}
         MenuProps={MenuProps}
-        inputProps={{ "aria-label": "Without label", name }}
+        inputProps={{
+          "aria-label": "Without label",
+          name,
+          id: "multiple-select",
+        }}
       >
         <MenuItem disabled value="">
-          <em>Placeholder</em>
+          <em>Select recipient</em>
         </MenuItem>
         {data?.map(({ name }) => (
           <MenuItem
             key={name}
             value={name}
+            className="hover:bg-indigo-400 hover:text-white"
             style={getStyles(name, personName, theme)}
           >
             {name}
           </MenuItem>
         ))}
       </Select>
-      <div>All</div>
-      <div>Clear</div>
     </>
   );
 }

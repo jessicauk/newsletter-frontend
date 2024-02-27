@@ -1,13 +1,31 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import Select from "../select";
-import InputFile from "../input-file";
+import InputFileUpload from "../input-file";
 import { getAllRecipients } from "../../app/http-client";
+import useFileUpload from "../../app/hooks/useFileUpload";
+import useSendEmail from "../../app/hooks/useSendEmail";
+
+interface Recipient {
+  name: string;
+  email: string;
+  isSubscribed: boolean;
+}
 
 export default function Form() {
-  const [recipients, setRecipients] = useState([]);
   const fetchRef = useRef(false);
+  const jsonData = useRef("");
+  const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [sent, setSent] = useState(false);
+
+  const { handleFilesChange, setFiles, formData, files } = useFileUpload();
+  const { response, isLoading } = useSendEmail({
+    formData,
+    jsonData: jsonData.current,
+    sent,
+  });
 
   useEffect(() => {
     const getRecipients = async () => {
@@ -20,21 +38,63 @@ export default function Form() {
       getRecipients();
     }
   }, []);
+
+  useEffect(() => {
+    if (response) {
+      setSent(false);
+      setSelected([]);
+      setFiles([]);
+    }
+  }, [response]);
+
+  const recipientsSelected = useMemo(() => {
+    if (recipients === undefined) return [];
+    return recipients
+      .filter((recipient) => selected.includes(recipient.name))
+      .map((recipient) => ({
+        name: recipient.name,
+        address: recipient.email,
+      }));
+  }, [selected, recipients]);
+
+  const onSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      jsonData.current = JSON.stringify({
+        to: recipientsSelected,
+        subject: `Newsletter ${new Date().toLocaleDateString()}`,
+        html: "<div><h1>Newsletter</h1><div>",
+      });
+      formData.append("data", jsonData.current);
+      setSent(true);
+    },
+    [recipientsSelected, formData, jsonData]
+  );
+  
   return (
     <form
-      className="flex flex-col justify-evenly h-3/5 p-1 content-center items-center"
-      action="/send-email"
-      method="post"
-      encType="multipart/form-data"
+      className="w-full h-5/6 flex flex-col justify-evenly grow shrink p-1 content-center items-center"
+      onSubmit={onSubmit}
     >
       <FormControl className="w-full">
-        <Select<any> name="recipient" required data={recipients} />
+        <Select<Recipient>
+          name="recipient"
+          required
+          data={recipients}
+          selected={selected}
+          setSelected={setSelected}
+        />
       </FormControl>
       <FormControl className="w-full">
-        <InputFile />
+        <InputFileUpload files={files} handleFilesChange={handleFilesChange} />
       </FormControl>
       <FormControl className="w-full">
-        <Button className="bg-indigo-500" type="submit" variant="contained">
+        <Button
+          disabled={isLoading || recipientsSelected.length === 0}
+          className="bg-indigo-500 hover:bg-indigo-700"
+          type="submit"
+          variant="contained"
+        >
           Send Email
         </Button>
       </FormControl>
