@@ -1,5 +1,7 @@
 "use client";
 
+import UserForm from "../../components/form-recipient/index";
+
 export default function Page() {
   return (
     <main className="bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% w-full h-screen flex flex-row justify-center items-center content-center">
@@ -7,6 +9,7 @@ export default function Page() {
         <h2 className="text-slate-900 dark:text-white text-3xl font-bold tracking-tight sm:text-4xl">
           Create New Recipient
         </h2>
+        <UserForm />
       </div>
     </main>
   );

@@ -16,7 +16,7 @@ export async function getAllRecipients() {
     const result = await response.json();
     return result;
   } catch (error) {
-    console.log(error);
+    return error;
   }
 }
 
@@ -59,5 +59,24 @@ export async function getRecipientByToken(token: string) {
     return result;
   } catch (error) {
     console.log(error);
+  }
+}
+
+export async function createRecipient(data: string) {
+  try {
+    const response = await fetch(`${API_URL}${API_RECIPIENT}`, {
+      method: "POST",
+      body: data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(MESSAGE_ERROR);
+    }
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    return error;
   }
 }
