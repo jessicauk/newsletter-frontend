@@ -102,7 +102,7 @@ export default function Form() {
 
   return (
     <form
-      className="box-border w-full h-5/6 flex flex-col justify-evenly grow shrink p-1 content-center items-center"
+      className="box-border w-full h-full flex flex-col justify-evenly grow shrink p-1 content-center items-center"
       onSubmit={onSubmit}
     >
       <FormControl className="w-full">
