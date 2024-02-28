@@ -70,7 +70,7 @@ export default function Form() {
     },
     [recipientsSelected, formData, jsonData]
   );
-  
+
   return (
     <form
       className="w-full h-5/6 flex flex-col justify-evenly grow shrink p-1 content-center items-center"
