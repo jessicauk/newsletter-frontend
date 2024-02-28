@@ -2,10 +2,24 @@
 
 Clone this repository
 
-## run
+## Run
 
 ```bash
 yarn dev
+```
+
+## Run Dockerfile
+
+### build image
+
+```bash
+docker build -t nextjs-app .
+```
+
+### run container
+
+```bash
+docker run -p 3000:3000 nextjs-app
 ```
 
 ## Running Tests
