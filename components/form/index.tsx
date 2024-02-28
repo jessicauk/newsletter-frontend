@@ -1,11 +1,19 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import Select from "../select";
 import InputFileUpload from "../input-file";
 import { getAllRecipients } from "../../app/http-client";
 import useFileUpload from "../../app/hooks/useFileUpload";
 import useSendEmail from "../../app/hooks/useSendEmail";
+import { SnackbarAlert } from "../snackbar";
+import {
+  MESSAGE_DOCUMENT,
+  MESSAGE_EMAIL,
+  MESSAGE_UNSUPPORTED_FILE,
+} from "../../app/utils/const";
+import useSnakbarAlert from "../../app/hooks/useSnackbar";
 
 interface Recipient {
   name: string;
@@ -19,8 +27,11 @@ export default function Form() {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [sent, setSent] = useState(false);
+  const { setMessage, setOpen, open, message, severity } = useSnakbarAlert();
 
-  const { handleFilesChange, setFiles, formData, files } = useFileUpload();
+  const { handleFilesChange, setFiles, formData, files, fileError } =
+    useFileUpload();
+
   const { response, isLoading } = useSendEmail({
     formData,
     jsonData: jsonData.current,
@@ -39,8 +50,14 @@ export default function Form() {
     }
   }, []);
 
+  const handleClick = () => {
+    setMessage(MESSAGE_EMAIL);
+    setOpen(true);
+  };
+
   useEffect(() => {
     if (response) {
+      handleClick();
       setSent(false);
       setSelected([]);
       setFiles([]);
@@ -60,6 +77,13 @@ export default function Form() {
   const onSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+
+      if (files.length == 0) {
+        setOpen(true);
+        setMessage(MESSAGE_DOCUMENT);
+        return;
+      }
+
       jsonData.current = JSON.stringify({
         to: recipientsSelected,
         subject: `Newsletter ${new Date().toLocaleDateString()}`,
@@ -68,8 +92,13 @@ export default function Form() {
       formData.append("data", jsonData.current);
       setSent(true);
     },
-    [recipientsSelected, formData, jsonData]
+    [recipientsSelected, formData, jsonData, files]
   );
+
+  const onCancel = useCallback(() => {
+    setSelected([]);
+    setFiles([]);
+  }, []);
 
   return (
     <form
@@ -86,18 +115,47 @@ export default function Form() {
         />
       </FormControl>
       <FormControl className="w-full">
-        <InputFileUpload files={files} handleFilesChange={handleFilesChange} />
+        {isLoading ? (
+          <div className="w-full h-24 flex justify-center items-center content-center">
+            <CircularProgress />
+          </div>
+        ) : (
+          <div className="flex flex-col justify-center content-center items-center">
+            {fileError && (
+              <div className="error text-red-800 m-4">
+                {MESSAGE_UNSUPPORTED_FILE}
+              </div>
+            )}
+            <InputFileUpload
+              files={files}
+              handleFilesChange={handleFilesChange}
+            />
+          </div>
+        )}
       </FormControl>
-      <FormControl className="w-full">
+      <FormControl className="w-full flex flex-row wrap">
         <Button
           disabled={isLoading || recipientsSelected.length === 0}
-          className="bg-indigo-500 hover:bg-indigo-700"
+          className="w-1/2"
+          onClick={onCancel}
+        >
+          Cancel
+        </Button>
+        <Button
+          disabled={isLoading || recipientsSelected.length === 0}
+          className="w-1/2 bg-indigo-500 hover:bg-indigo-700"
           type="submit"
           variant="contained"
         >
-          Send Email
+          {isLoading ? "Sending..." : "Send"}
         </Button>
       </FormControl>
+      <SnackbarAlert
+        severity={severity}
+        open={open}
+        setOpen={setOpen}
+        message={message}
+      />
     </form>
   );
 }

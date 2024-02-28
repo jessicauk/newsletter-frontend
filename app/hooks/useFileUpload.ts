@@ -1,11 +1,24 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import fileValidate from "../utils/file-validation";
 
 export default function useFileUpload() {
   const [files, setFiles] = useState<File[]>([]);
+  const [fileError, setFileError] = useState(false);
 
-  const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFiles(e.target.files ? Array.from(e.target.files) : []);
-  };
+  const handleFilesChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const filesArray = e.target.files ? Array.from(e.target.files) : [];
+
+    // validate all files
+    const allFilesValid = filesArray.every((file) => fileValidate(file));
+
+    if (allFilesValid) {
+      setFiles(filesArray);
+      setFileError(false);
+    } else {
+      setFiles([]);
+      setFileError(true);
+    }
+  }, []);
 
   const formDataFiles = useMemo(() => {
     const formData = new FormData();
@@ -17,5 +30,11 @@ export default function useFileUpload() {
     return formData;
   }, [files]);
 
-  return { handleFilesChange, formData: formDataFiles, files, setFiles };
+  return {
+    handleFilesChange,
+    formData: formDataFiles,
+    files,
+    setFiles,
+    fileError,
+  };
 }

@@ -61,7 +61,7 @@ export default function InputFile({
       />
       <div
         id="file-name"
-        className="overflow-auto m-auto w-5/6 h-24 max-[500px]:bg-red-400 md:h-52 mt-2 text-gray-700"
+        className="overflow-auto m-auto w-5/6 h-24 md:h-52 mt-2 text-gray-700"
       ></div>
     </>
   );
