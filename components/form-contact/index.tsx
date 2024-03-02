@@ -105,13 +105,15 @@ export default function ContactForm() {
       )}
       {isSubmitting && <CircularProgress className="w-3/4" />}
       <Box className="w-full md:w-3/4 flex flex-row wrap justify-evenly">
-        <Button onClick={onClick}>Cancel</Button>
+        <Button className="text-indigo-800" onClick={onClick}>
+          Cancel
+        </Button>
         <Button
           type="submit"
           className="bg-indigo-500 hover:bg-indigo-700"
           variant="contained"
           color="primary"
-          // disabled={isSubmitting || !isValid}
+          disabled={isSubmitting}
         >
           {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
