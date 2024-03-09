@@ -1,4 +1,11 @@
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+  useContext,
+} from "react";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -16,6 +23,7 @@ import {
 } from "../../app/utils/const";
 import useSnakbarAlert from "../../app/hooks/useSnackbar";
 import DialogTextEditor from "../modal-text-editor";
+import { ContextApp } from "../../app/context/app";
 
 interface Recipient {
   name: string;
@@ -67,7 +75,10 @@ export default function Form() {
     sent,
   });
 
+  const app = useContext(ContextApp);
+
   useEffect(() => {
+    app?.setTheme("dark");
     const getRecipients = async () => {
       fetchRef.current = true;
       try {
