@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useContext } from "react";
 
 type Theme = "light" | "dark";
 type Severity = "success" | "error" | "info";
@@ -24,6 +24,15 @@ const defaultContext: Partial<Context> = {
   },
 };
 export const ContextApp = createContext<Context | undefined>(undefined);
+
+export const useApp = () => {
+  const context = useContext(ContextApp);
+  if (!context) {
+    throw new Error("Use theme provider");
+  }
+  return context;
+};
+
 export default function AppContext({
   children,
 }: {
