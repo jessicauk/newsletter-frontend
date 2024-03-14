@@ -40,14 +40,14 @@ const Header = ({ setOpenModal }: HeaderProps) => {
     setOpenModal(true);
   };
   return (
-    <div className="w-full flex flex-row wrap justify-between content-center">
-      <h2 className="text-slate-900 dark:text-white text-3xl font-bold tracking-tight sm:text-4xl">
+    <div className="w-full flex flex-row wrap justify-between content-center gap-4">
+      <h2 className="text-slate-900 dark:text-white text-lg md:text-3xl font-bold tracking-tight sm:text-4xl">
         Compose Newsletter
       </h2>
       <Button
         onClick={onClick}
         variant="contained"
-        className="bg-indigo-500 hover:bg-indigo-700"
+        className="bg-indigo-500 hover:bg-indigo-700 w-1/3 md:w-1/3 text-xs"
       >
         Edit template
       </Button>
